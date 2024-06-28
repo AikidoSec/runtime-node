@@ -21,6 +21,7 @@ import { Source } from "./Source";
 import { Users } from "./Users";
 import { wrapInstalledPackages } from "./wrapInstalledPackages";
 import { Wrapper } from "./Wrapper";
+import { wrapRequire } from "./wrapRequire";
 
 type WrappedPackage = { version: string | null; supported: boolean };
 
@@ -381,6 +382,9 @@ export class Agent {
     }
 
     this.wrappedPackages = wrapInstalledPackages(this, wrappers);
+
+    // Wrap require function
+    wrapRequire(this);
 
     for (const pkg in this.wrappedPackages) {
       const details = this.wrappedPackages[pkg];

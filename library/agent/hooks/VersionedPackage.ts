@@ -1,11 +1,23 @@
 import { WrappableSubject } from "./WrappableSubject";
 import { WrappableFile } from "./WrappableFile";
+import {
+  ModifyingRequireInterceptor,
+  ModifyingRequireInterceptorFunction,
+} from "./ModifyingRequireInterceptor";
+import { addRequireInterceptor } from "../wrapRequire";
+import { WrappableRequireSubject } from "./WrappableRequireSubject";
 
 export class VersionedPackage {
   private subjects: WrappableSubject[] = [];
   private files: WrappableFile[] = [];
 
-  constructor(private readonly range: string) {
+  constructor(
+    private readonly packageName: string,
+    private readonly range: string
+  ) {
+    if (!this.packageName) {
+      throw new Error("Package name is required");
+    }
     if (!this.range) {
       throw new Error("Version range is required");
     }
@@ -29,11 +41,25 @@ export class VersionedPackage {
     return fn;
   }
 
+  /**
+   * Wraps the require function for this package.
+   * Only required if root export of module is a function.
+   * Use addSubject to wrap other exports.
+   */
+  addRequireSubject() {
+    const require = new WrappableRequireSubject(this);
+    return require;
+  }
+
   getSubjects() {
     return this.subjects;
   }
 
   getFiles() {
     return this.files;
+  }
+
+  getName() {
+    return this.packageName;
   }
 }
